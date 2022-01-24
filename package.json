@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/eze1er/tinyapp.1/issues"
   },
-  "homepage": "https://github.com/eze1er/tinyapp.1#readme"
+  "homepage": "https://github.com/eze1er/tinyapp.1#readme",
+  "dependencies": {
+    "express": "^4.17.2"
+  }
 }
