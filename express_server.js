@@ -1,13 +1,34 @@
+// Express server is th logic program. The one who communicate with all files in he application.
+
+/*
+***************
+SETUP         *
+FUNCTIONS     *
+VARIABLES     *
+***************
+*/
+
+// APP CONFIG
+
 const express = require("express");
+const { urlsForUser } = require("../../../w3/tinyapp/helpers");
 const app = express();
 const PORT = 8080; // default port 8080
 
 app.set("view engine", "ejs");
 
-const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
-};
+// variables
+
+const urlDatabase = {};
+const users = {};
+
+app.get("/urls", (req, res) => {
+  
+  const templateVars = { urls: urlDatabase };
+  // console.log(templateVars);
+  res.render("urls_index", templateVars);
+});
+
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -24,11 +45,11 @@ app.get("/hello", (req, res) => {
 app.get("/set", (req, res) => {
   const a = 1;
   res.send(`a = ${a}`);
- });
+});
  
- app.get("/fetch", (req, res) => {
+app.get("/fetch", (req, res) => {
   res.send(`a = ${a}`);
- });
+});
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
