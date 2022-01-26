@@ -138,9 +138,24 @@ app.post("/login", (req, res) => {
 })
 
 app.post("/logout", (req, res) => {
-  
+
   res.redirect("/login");
-})
+});
+
+app.get("/register", (req, res) => {
+//   if user is logged in:
+// (Minor) redirects to /urls
+// if user is not logged in:
+// returns HTML with:
+// a form which contains:
+// input fields for email and password
+// a register button that makes a POST request to /register
+const { username } = req.body;
+if (username) {
+  res.redirect("/urls");
+}
+res.render("/registration");
+});
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
