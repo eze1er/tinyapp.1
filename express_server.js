@@ -16,12 +16,15 @@ const app = express();
 const PORT = 8080; // default port 8080
 
 const bodyParser = require("body-parser");
+const cookieParser = require('cookie-parser');
 const res = require("express/lib/response");
 app.use(bodyParser.urlencoded({extended: true}));
 
 const cookieSession = require('cookie-session');
+const { cookie } = require("express/lib/response");
+// const cookieParser = require("cookie-parser");
 app.use(cookieSession({name: 'session', secret: 'grey-rose-juggling-volcanoes'}));
-
+app.use(cookieParser());
 app.set("view engine", "ejs");
 
 // variables
@@ -47,13 +50,22 @@ const generateRandomString = () => {
   while (randomString.length < 6) {
     randomString += chars[Math.floor(Math.random() * chars.length)];
   }
-  console.log(randomString);
+  // console.log(randomString);
   return randomString;
 };
 
-app.get("/urls.json", (req, res) => {
-  console.log(urlDatabase);
-  res.json(urlDatabase);
+// app.get("/urls.json", (req, res) => {
+//   console.log(urlDatabase);
+//   res.json(urlDatabase);
+// });
+app.get("/", (req, res) => {
+  const templateVars = {
+    username: req.cookies['username'],
+  };
+  // res.render("urls_new", templateVars);
+  // console.log(`templateVars: ${templateVars}`);
+  res.redirect("/login");
+  
 });
 
 app.get("/urls", (req, res) => {
@@ -65,7 +77,15 @@ app.get("/urls", (req, res) => {
 // Creation new url page - GET
 
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  // const username = req.cookies.username;
+  // if (username == null || username == undefined) {
+  //   return res.redirect('/login');
+  // }
+  const templateVars = {
+
+    username: req.cookies['username'],
+  };
+  res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:shortURL", (req, res) => {
@@ -99,10 +119,27 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 app.post("/urls/:id", (req, res) => {
   res.redirect("/urls")
 })
+
+// app.get("/login", (req, res) => {
+//   return res.end('You must be login');
+//   res.render('/login');
+// })
+
 app.post("/login", (req, res) => {
-  const user = res.header.cookies.name;
-  console.log(`user: ${user}`);
-  res.redirect("/urls");
+  // const username = req.body.username;
+  const { username } = req.body;
+  res.cookie('username', username);
+  return res.redirect('/urls/new');
+  // const templateVars = {
+  //   username: req.cookies["username"],
+  // };
+  // // console.log(`user: ${user}`);
+  // res.render("/urls", templateVars);
+})
+
+app.post("/logout", (req, res) => {
+  
+  res.redirect("/login");
 })
 
 app.listen(PORT, () => {

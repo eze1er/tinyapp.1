@@ -20,17 +20,24 @@
           <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
         </li>
       </ul>
-      <% let user = true %>
-      <% if (!user) { %>
-      <a class="btn btn-primary" href="/login">Login</a>
+      <% if (username) { %>
+        <!-- <form class="form-inline my-1" action="/logout" method="POST"> -->
+          Logged in as: <%= username %>
+          <button type="submit" class="btn btn-outline-primary ml-3">
+            <a href="/logout">Logout</a>
+            
+          </button>
+        <!-- </form> -->
 
       <% } else { %>
-      <form class="form-inline my-1" action="/logout" method="POST">
-        Logged in as: <%= user %>
-        <button type="submit" class="btn btn-outline-primary ml-3">
-          Logout
-        </button>
-      </form>
+        <!-- <a class="btn btn-primary" href="/login">Login</a> -->
+        <form class="form-inline my-1" action="/login" method="POST">
+          <!-- Login in as: <%= username %> -->
+          <input type="text" name="username" placeholder="username">
+          <button type="submit" class="btn btn-outline-primary ml-3">
+            Login
+          </button>
+        </form>
       <% } %>
     </div>
   </nav>

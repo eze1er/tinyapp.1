@@ -8,8 +8,13 @@
 
 <body>
   
+  <!-- <%- include('partials/_header') %> -->
+  <% if (username) { %>
+    <%- include('partials/_header', { username: username}) %>
+
+  <% } else { %>
   <%- include('partials/_header') %>
-  
+  <% } %>
   <div class="card text-center">
       <div class="card-header"></div>
       <div class="card-body">
