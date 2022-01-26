@@ -19,6 +19,9 @@ const bodyParser = require("body-parser");
 const res = require("express/lib/response");
 app.use(bodyParser.urlencoded({extended: true}));
 
+const cookieSession = require('cookie-session');
+app.use(cookieSession({name: 'session', secret: 'grey-rose-juggling-volcanoes'}));
+
 app.set("view engine", "ejs");
 
 // variables
@@ -28,6 +31,13 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com" 
 };
 const users = {};
+
+///////////////////////////////////////////
+/*
+ROUTING
+*/
+// root Login
+
 
 // functions 
 const generateRandomString = () => {
@@ -86,6 +96,14 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   res.redirect("/urls");
 }) 
 
+app.post("/urls/:id", (req, res) => {
+  res.redirect("/urls")
+})
+app.post("/login", (req, res) => {
+  const user = res.header.cookies.name;
+  console.log(`user: ${user}`);
+  res.redirect("/urls");
+})
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
