@@ -18,14 +18,19 @@ const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
 const res = require("express/lib/response");
-app.use(bodyParser.urlencoded({extended: true}));
-
+const morgan = require('morgan');
 const cookieSession = require('cookie-session');
 const { cookie } = require("express/lib/response");
+
+
 // const cookieParser = require("cookie-parser");
 app.use(cookieSession({name: 'session', secret: 'grey-rose-juggling-volcanoes'}));
 app.use(cookieParser());
+app.use(morgan('dev'));
+app.use(bodyParser.urlencoded({extended: true}));
+
 app.set("view engine", "ejs");
+
 
 // variables
 
@@ -54,53 +59,53 @@ const generateRandomString = () => {
   return randomString;
 };
 
-// app.get("/urls.json", (req, res) => {
-//   console.log(urlDatabase);
-//   res.json(urlDatabase);
-// });
 app.get("/", (req, res) => {
-  const templateVars = {
-    username: req.cookies['username'],
-  };
-  // res.render("urls_new", templateVars);
-  // console.log(`templateVars: ${templateVars}`);
-  res.redirect("/login");
-  
+  // const userID = req.session.userID;
+  if (req.session.userID) {
+    res.redirect('/urls');
+  } else {
+    res.redirect('/login');
+  }
 });
 
 app.get("/urls", (req, res) => {
-  
-  const templateVars = { urls: urlDatabase };
-  console.log(templateVars);
-  res.render("urls_index", templateVars);
+  const userID = req.session.userID;
+  const userUrls = urlsForUser(userID, urlDatabase);
+  const templateVars = { urls: userUrls, user: users[userID] };
+  res.render('urls_index', templateVars);
 });
-// Creation new url page - GET
+// // Creation new url page - GET
 
 app.get("/urls/new", (req, res) => {
-  // const username = req.cookies.username;
-  // if (username == null || username == undefined) {
-  //   return res.redirect('/login');
-  // }
-  const templateVars = {
-
-    username: req.cookies['username'],
-  };
-  res.render("urls_new", templateVars);
+  if (req.session.userID) {
+    const templateVars = {user: users[req.session.userID]};
+    res.render('urls_new', templateVars);
+  } else {
+    res.redirect('/login');
+  }
 });
 
 app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
-  const templateVars = { shortURL: shortURL, longURL: urlDatabase[shortURL]
-  };
+  const userID = req.session.userID;
+  const userUrls = urlsForUser(userID, urlDatabase);
+  const templateVars = { urlDatabase, userUrls, shortURL, user: users[userID] };
   res.render("urls_show", templateVars);
 });
 
 app.post("/urls", (req, res) => {
-  const shortURL = generateRandomString();
-  const longURL = req.body.longURL;
-  urlDatabase[shortURL] = longURL;
-  
-  res.redirect(`/urls/${shortURL}`); 
+  if (req.session.userID) {
+    const shortURL = generateRandomString();
+    urlDatabase[shortURL] = {
+      longURL: req.body.longURL,
+      userID: req.session.userID
+    };
+    res.redirect(`/urls/${shortURL}`);
+    return;
+
+  } 
+  res.redirect(`/urls/${shortURL}`);
+
 });
 
 app.get("/u/:shortURL", (req, res) => {
@@ -114,49 +119,39 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   console.log(`shortURL: ${shortURL}`);
     delete urlDatabase[shortURL];
   res.redirect("/urls");
-}) 
+}); 
 
 app.post("/urls/:id", (req, res) => {
   res.redirect("/urls")
-})
-
-// app.get("/login", (req, res) => {
-//   return res.end('You must be login');
-//   res.render('/login');
-// })
+});
 
 app.post("/login", (req, res) => {
-  // const username = req.body.username;
-  const { username } = req.body;
+  const username = req.body.username;
+  // const { username } = req.body;
+  console.log(`username: ${username}`);
+
   res.cookie('username', username);
-  return res.redirect('/urls/new');
-  // const templateVars = {
-  //   username: req.cookies["username"],
-  // };
-  // // console.log(`user: ${user}`);
-  // res.render("/urls", templateVars);
+  return res.redirect('/urls/new', username);
 })
 
 app.post("/logout", (req, res) => {
-
   res.redirect("/login");
 });
 
-app.get("/register", (req, res) => {
-//   if user is logged in:
-// (Minor) redirects to /urls
-// if user is not logged in:
-// returns HTML with:
-// a form which contains:
-// input fields for email and password
-// a register button that makes a POST request to /register
-const { username } = req.body;
-if (username) {
-  res.redirect("/urls");
-}
-res.render("/registration");
+  app.get("/register", (req, res) => {
+    if (req.session.userID) {
+      res.redirect('/urls');
+      return;
+    }
+    const templateVars = {user: users[req.session.userID]};
+    res.render('urls_registration', templateVars);
+  });
+
+app.post('/register', (req, res) => {
+  console.log(req.body);
+  res.redirect('/urls');
 });
 
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
+  console.log(`Tiny App listening on port ${PORT}!`);
 });
