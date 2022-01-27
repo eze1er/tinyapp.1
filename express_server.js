@@ -11,16 +11,16 @@ VARIABLES     *
 // APP CONFIG
 
 const express = require("express");
-const { urlsForUser, getUserByEmail } = require("../../../w3/tinyapp/helpers");
+const { urlsForUser } = require("../../../w3/tinyapp/helpers");
 const app = express();
 const PORT = 8080; // default port 8080
 
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
-const res = require("express/lib/response");
+// const res = require("express/lib/response");
 const morgan = require('morgan');
 const cookieSession = require('cookie-session');
-const { cookie } = require("express/lib/response");
+// const { cookie } = require("express/lib/response");
 
 
 // const cookieParser = require("cookie-parser");
@@ -48,6 +48,8 @@ ROUTING
 
 
 // functions
+const { getUserByEmail } = require('./helpers');
+
 const generateRandomString = () => {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let randomString = '';
@@ -73,9 +75,16 @@ app.get("/urls", (req, res) => {
   const userUrls = urlsForUser(userID, urlDatabase);
   const templateVars = { urls: userUrls, user: users[userID] };
   res.render('urls_index', templateVars);
-});
-// // Creation new url page - GET
 
+  if (!userID) {
+    res.statusCode = 401;
+  }
+  res.render("urls_index", templateVars);
+});
+
+// Creation new url page - GET
+// Validates if it new or already exist.
+// if exist in db, render page
 app.get("/urls/new", (req, res) => {
   if (req.session.userID) {
     const templateVars = {user: users[req.session.userID]};
@@ -104,7 +113,7 @@ app.post("/urls", (req, res) => {
     return;
 
   }
-  res.redirect(`/urls/${shortURL}`);
+  res.redirect('/urls/');
 
 });
 
@@ -135,19 +144,22 @@ app.get('/login', (req, res) => {
   res.render('urls_login', templateVars);
 });
 
-// app.post('/login', (req, res) => {
-  app.post('/login', (req, res) => {
-    const user = getUserByEmail(req.body.email, users);
-    if (user && user.password === req.body.password) {
-      res.redirect('/urls');
-    } else {
-      const errorMessage = 'Login credentials not valid. Please make sure you enter the correct username and password.';
-      res.status(401).render('urls_error', {user: users[req.session.userID], errorMessage })
-    }
-  })
+app.post('/login', (req, res) => {
+  const user = getUserByEmail(req.body.email, users);
+  if (user && user.password === req.body.password) {
+    res.redirect('/urls');
+  } else {
+    const errorMessage = 'Login credentials not valid. Please make sure you enter the correct username and password.';
+    res.status(401).render('urls_error', {user: users[req.session.userID], errorMessage });
+  }
+});
 
+// Logging out - POST
+// clears cookies and redirects to urls index page
 app.post("/logout", (req, res) => {
-  res.redirect("/login");
+  res.clearCookie('session');
+  res.clearCookie('session.sig');
+  res.redirect('/urls');
 });
 
 app.get("/register", (req, res) => {
@@ -159,6 +171,8 @@ app.get("/register", (req, res) => {
   res.render('urls_registration', templateVars);
 });
 
+// registration - POST
+// redirects to urls index page if credentials are valid
 app.post('/register', (req, res) => {
   if (req.body.email && req.body.password) {
 
@@ -168,6 +182,7 @@ app.post('/register', (req, res) => {
         userID,
         email: req.body.email,
         password: req.body.password
+        // password
       };
       req.session.userID = userID;
       res.redirect('/urls');
@@ -181,6 +196,7 @@ app.post('/register', (req, res) => {
   }
 });
 
+// server connection
 app.listen(PORT, () => {
   console.log(`Tiny App listening on port ${PORT}!`);
 });
