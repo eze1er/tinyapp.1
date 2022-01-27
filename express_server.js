@@ -11,7 +11,6 @@ VARIABLES     *
 // APP CONFIG
 
 const express = require("express");
-const { urlsForUser } = require("../../../w3/tinyapp/helpers");
 const app = express();
 const PORT = 8080; // default port 8080
 
@@ -48,7 +47,7 @@ ROUTING
 
 
 // functions
-const { getUserByEmail } = require('./helpers');
+const { getUserByEmail, urlsForUser } = require('./helpers');
 
 const generateRandomString = () => {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
