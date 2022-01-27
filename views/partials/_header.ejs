@@ -25,7 +25,7 @@
       <a class="btn btn-primary" href="/register">Register</a>
       <% } else { %>
       <form class="form-inline my-1" action="/logout" method="POST">
-        Logged in as: <%= user.email %>
+        Logged in as: <%= user %>
         <button type="submit" class="btn btn-outline-primary ml-3">
           Logout
         </button>
