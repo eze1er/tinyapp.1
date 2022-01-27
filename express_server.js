@@ -124,15 +124,27 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 app.post("/urls/:id", (req, res) => {
   res.redirect("/urls");
 });
-
-app.post("/login", (req, res) => {
-  const username = req.body.username;
-  // const { username } = req.body;
-  console.log(`username: ${username}`);
-
-  res.cookie('username', username);
-  return res.redirect('/urls/new', username);
+// login page - GET
+// redirects to urls index page if already logged in
+app.get('/login', (req, res) => {
+  if (req.session.userID) {
+    res.redirect('/urls');
+    return;
+  }
+  const templateVars = {user: users[req.session.userID]};
+  res.render('urls_login', templateVars);
 });
+
+// app.post('/login', (req, res) => {
+  app.post('/login', (req, res) => {
+    const user = getUserByEmail(req.body.email, users);
+    if (user && user.password === req.body.password) {
+      res.redirect('/urls');
+    } else {
+      const errorMessage = 'Login credentials not valid. Please make sure you enter the correct username and password.';
+      res.status(401).render('urls_error', {user: users[req.session.userID], errorMessage })
+    }
+  })
 
 app.post("/logout", (req, res) => {
   res.redirect("/login");
@@ -155,7 +167,7 @@ app.post('/register', (req, res) => {
       users[userID] = {
         userID,
         email: req.body.email,
-        password: bcrypt.hashSync(req.body.password, 10)
+        password: req.body.password
       };
       req.session.userID = userID;
       res.redirect('/urls');
