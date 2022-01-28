@@ -25,23 +25,25 @@
         </tr>
       </thead>
       <tbody>
-        <% for(let url in urls) { %>
-          <tr>
-            <td><%= url %></td>
-            <td><%= urls[url] %></td>
-            <td>
-              <a class="btn btn-outline-primary" href="/urls/<%= url %>">Edit</a>
-            </td>
-            <td>
-              <form method="POST" action="/urls/<%= url %>/delete">
-                <button type="submit" class="btn btn-outline-danger">Delete</button>
-              </form>
-            </td>
-          </tr>
-        <% } %>
 
-      </tbody>
-    </table>
+          <% for(let url in urls) { %>
+            <tr>
+              <td><%= url %></td>
+              <td><%= urls[url].longURL %></td>
+              <td>
+                <a class="btn btn-outline-primary" href="/urls/<%= url %>">Edit</a>
+              </td>
+              <td>
+                <form method="POST" action="/urls/<%= url %>/delete">
+                  <button type="submit" class="btn btn-outline-danger">Delete</button>
+                </form>
+              </td>
+            </tr>
+          <% } %>
+  
+        </tbody>
+      </table>
+
     <a class="btn btn-primary" href="/urls/new">Create a New Short Link</a>
     <% } else { %>
       <h5 class="text-muted mt-3">You must login or register to see your URLs.</h5>
