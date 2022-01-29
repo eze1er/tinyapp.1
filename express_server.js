@@ -278,5 +278,5 @@ app.post("/register", (req, res) => {
 
 // server connection
 app.listen(PORT, () => {
-  console.log(`Tiny App listening on port ${PORT}!`);
+  console.log(`Tinyapp listening on port ${PORT}!`);
 });
