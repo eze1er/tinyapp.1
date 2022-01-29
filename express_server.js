@@ -111,7 +111,6 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
-  // const longURL = urlDatabase[shortURL];
   const userID = req.session.userID;
   const userUrls = urlsForUser(userID, urlDatabase);
   const templateVars = {
@@ -146,7 +145,6 @@ app.post("/urls/:shortURL", (req, res) => {
     req.session.userID &&
     req.session.userID === urlDatabase[shortURL].userID
   ) {
-    // to see after
     urlDatabase[shortURL].longURL = req.body.updateURL;
     res.redirect("/urls");
   } else {

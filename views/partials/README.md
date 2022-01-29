@@ -4,7 +4,19 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 ## Final Product
 
+!["Main page"](https://github.com/eze1er/tinyapp.1/blob/main/docs/urls_index.png)
 
+!["Screenshot of login page"](https://github.com/eze1er/tinyapp.1/blob/main/docs/urls_login.png)
+
+!["shortURL page"](https://github.com/eze1er/tinyapp.1/blob/main/docs/shortURL.png)
+
+!["Short URL list"](https://github.com/eze1er/tinyapp.1/blob/main/docs/urls_myURL.png)
+
+!["Creation of new URL page"](https://github.com/eze1er/tinyapp.1/blob/main/docs/urls_new.png)
+
+!["Registration  page"](https://github.com/eze1er/tinyapp.1/blob/main/docs/urls_register.png)
+
+!["Creation shortURL page"](https://github.com/eze1er/tinyapp.1/blob/main/docs/urls_shortURL.png)
 
 
 ## Dependencies
