@@ -1,13 +1,3 @@
-const bcrypt = require('bcryptjs');
-const getUserByEmail = (email, users) => {
-  for (let user in users) {
-    if (users[user].email === email) {
-      return true;
-    }
-  }
-  return false;
-};
-
 // urlsForUser function is for checking the user in DB
 const urlsForUser = (id, database) => {
   let userUrls = {};
@@ -20,6 +10,7 @@ const urlsForUser = (id, database) => {
 
   return userUrls;
 };
+// generateRandomString is function for create a new or check a existing email . 
 
 const generateRandomString = () => {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -28,44 +19,18 @@ const generateRandomString = () => {
   while (randomString.length < 6) {
     randomString += chars[Math.floor(Math.random() * chars.length)];
   }
-  // console.log(randomString);
   return randomString;
 };
 
-const passwordValidation = function(password, user) {
-  if (bcrypt.compareSync(password, user.password)) {
-    return true;
-  }
-  return false;
-}
-const authUser = function(users, email, password) {
-  console.log(`users: ${users}`);
-  for (let user in users) {
-    const userEmail = getUserByEmail(email, users);
-    if (userEmail && bcrypt.compareSync(password, users[user].password)) {
-      return users[user];
+// email check 
+
+const getUserByEmail = (email, database) => {
+  for (const user in database) {
+    if (database[user].email === email) {
+      return database[user];
     }
   }
-  return false;
-}
-
-const fetchUserUrls = (urlDatabase, sessionID) => {
-  let userUrls = {};
-  for (let shortUrl in urlDatabase) {
-    if (urlDatabase[shortUrl].userID == sessionID) {
-      userUrls[shortUrl] = urlDatabase[shortUrl].longURL;
-    }
-  }
-  return userUrls;
-};
-// fetching all urls for unregistered user
-const fetchAllUrls = () => {
-  let userUrls = {};
-  for (let shortUrl in urlDatabase) {
-    userUrls[shortUrl] = urlDatabase[shortUrl].longURL;
-  }
-  return userUrls;
+  return undefined;
 };
 
-
-module.exports = { getUserByEmail, urlsForUser, generateRandomString, passwordValidation, authUser, fetchAllUrls, fetchUserUrls };
+module.exports = { urlsForUser, generateRandomString, getUserByEmail };
