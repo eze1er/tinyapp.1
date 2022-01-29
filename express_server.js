@@ -16,24 +16,16 @@ const PORT = 8080; // default port 8080
 
 // for to be able to use POST
 const bodyParser = require("body-parser");
-const cookieParser = require("cookie-parser");
 const { text } = require("body-parser");
-const { application } = require("express")
+const { application } = require("express");
+app.use(bodyParser.urlencoded({ extended: true }));
+
+const cookieSession = require("cookie-session");
+app.use(cookieSession({ name: "session", secret: "grey-rose-juggling-volcanoes" }));
 
 const bcrypt = require("bcryptjs");
 const password = "purple-monkey-dinosaur"; // found in the req.params object
 const hashedPassword = bcrypt.hashSync(password, 10);
-
-const cookieSession = require("cookie-session");
-// const { cookie } = require("express/lib/response");
-
-// const cookieParser = require("cookie-parser");
-app.use(
-  cookieSession({ name: "session", secret: "grey-rose-juggling-volcanoes" })
-);
-app.use(cookieParser());
-// app.use(morgan('dev'));
-app.use(bodyParser.urlencoded({ extended: true }));
 
 app.set("view engine", "ejs");
 
@@ -61,7 +53,7 @@ app.get("/", (req, res) => {
   if (req.session.userID) {
     res.redirect("/urls");
   } else {
-    res.render("urls_login");
+    res.redirect("/login");
   }
 });
 
@@ -217,6 +209,11 @@ app.get("/login", (req, res) => {
 app.post("/login", (req, res) => {
   const user = getUserByEmail(req.body.email, users);
 
+  if (user === undefined) {
+    const errorMessage = 'Login credentials not valid. Make sure you are registered.';
+    res.status(401).render('urls_error', {user: users[req.session.userID], errorMessage});
+  };
+
   if (user && bcrypt.compareSync(req.body.password, user.password)) {
     req.session.userID = user.userID;
     res.redirect('/urls');
@@ -252,6 +249,7 @@ app.get("/register", (req, res) => {
 
 app.post("/register", (req, res) => {
   if (req.body.email && req.body.password) {
+
     if (!getUserByEmail(req.body.email, users)) {
       const userID = generateRandomString();
       users[userID] = {userID,
