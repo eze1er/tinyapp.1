@@ -61,7 +61,7 @@ app.get("/", (req, res) => {
   if (req.session.userID) {
     res.redirect("/urls");
   } else {
-    res.render("/login");
+    res.render("urls_login");
   }
 });
 
@@ -119,15 +119,14 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
-  const longURL = urlDatabase[shortURL];
+  // const longURL = urlDatabase[shortURL];
   const userID = req.session.userID;
   const userUrls = urlsForUser(userID, urlDatabase);
   const templateVars = {
     urlDatabase,
     userUrls,
     shortURL,
-    longURL,
-    user: users[userID],
+    user: users[userID]
   };
 
   if (!urlDatabase[shortURL]) {
@@ -185,7 +184,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
       .render("urls_error", { user: users[req.session.userID], errorMessage });
   }
 });
-// *8********en haut
+
 // redirecting - GET
 // redirects to the login (actual) url
 
@@ -202,10 +201,8 @@ app.get("/u/:shortURL", (req, res) => {
 
 // login page - GET
 // redirects to urls index page if already logged in
-// ****** ceci ok
+
 app.get("/login", (req, res) => {
-
-
   if (req.session.userID) {
     res.redirect("/urls");
     return;
@@ -218,54 +215,34 @@ app.get("/login", (req, res) => {
 // redirects to urls index page if credentials are valid
 
 app.post("/login", (req, res) => {
-  const { email, password } = req.body;
-  if (email === "" || password === "") {
-    return res.send("credential not correct");
+  const user = getUserByEmail(req.body.email, users);
+
+  if (user && bcrypt.compareSync(req.body.password, user.password)) {
+    req.session.userID = user.userID;
+    res.redirect('/urls');
+  } else {
+    const errorMessage = 'Login credentials not valid. Please make sure you enter the correct username and password.';
+    res.status(401).render('urls_error', {user: users[req.session.userID], errorMessage});
   }
-  const findSingleUser = authUser(users, email, password);
-  console.log(`findSingleUser: ${findSingleUser}`);
-  const id = findSingleUser.id;
-  if (!findSingleUser) {
-    return res.send('User not find or ');
-  }
-  req.session['userID'] = id;
-  res.redirect('/urls');
+});
 
-  // const user = getUserByEmail(req.body.email, users);
+// Logging out - POST
+// clears cookies and redirects to urls index page
 
-
-  // if (user) {
-  //   if (passwordValidation(req.body.password, users[user])) {
-  //     req.session.userID = user.userID;
-  //     res.redirect("/urls/new");
-  //     // res.redirect('/urls');
-  //   } else {
-  //     const errorMessage =
-  //       "Login credentials not valid. Please make sure you enter the correct username and password.";
-  //     res
-  //       .status(401)
-  //       .render("urls_error", {
-  //         user: users[req.session.userID],
-  //         errorMessage,
-  //       });
-  //   }
-  // } else {
-  //   const errorMessage =
-  //     "Login credentials not valid. Please make sure you enter the correct username.";
-  //   res
-  //     .status(401)
-  //     .render("urls_error", { user: users[req.session.userID], errorMessage });
-  // }
+app.post("/logout", (req, res) => {
+  res.clearCookie("session");
+  res.clearCookie("session.sig");
+  res.redirect("/urls");
 });
 
 // registration page - GET
 // redirects to urls index page if already logged in.
 
 app.get("/register", (req, res) => {
-  // if (req.session.userID) {
-  //   res.redirect('/urls');
-  //   return;
-  // }
+  if (req.session.userID) {
+    res.redirect('/urls');
+    return;
+  }
   const templateVars = { user: users[req.session.userID] };
   res.render("urls_registration", templateVars);
 });
@@ -275,23 +252,13 @@ app.get("/register", (req, res) => {
 
 app.post("/register", (req, res) => {
   if (req.body.email && req.body.password) {
-    const userID = generateRandomString();
-    const email = req.body.email;
-    const password = req.body.password;
-
-    if (!getUserByEmail(email, users)) {
-      const salt = bcrypt.genSaltSync(saltRound);
-      const newUser = {
-        userID,
-        email,
-        password: bcrypt.hashSync(password, salt),
-      };
-
-      users[userID] = newUser;
-      urlDatabase[userID] = newUser;
-      // console.log('users ', users);
+    if (!getUserByEmail(req.body.email, users)) {
+      const userID = generateRandomString();
+      users[userID] = {userID,
+        email: req.body.email,
+        password: bcrypt.hashSync(req.body.password, 10)};
       req.session.userID = userID;
-      res.redirect("/urls/new");
+      res.redirect("/urls");
     } else {
       const errorMessage =
         "Cannot create new account, because this email address is already registered.";
@@ -309,15 +276,6 @@ app.post("/register", (req, res) => {
       .status(400)
       .render("urls_error", { user: users[req.session.userID], errorMessage });
   }
-});
-
-// Logging out - POST
-// clears cookies and redirects to urls index page
-
-app.post("/logout", (req, res) => {
-  res.clearCookie("session");
-  res.clearCookie("session.sig");
-  res.redirect("/urls");
 });
 
 // server connection
