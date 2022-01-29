@@ -14,16 +14,16 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 
+// for to be able to use POST
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
+const { text } = require("body-parser");
+const { application } = require("express")
 
 const bcrypt = require("bcryptjs");
-const saltRound = 10;
-// const password = "purple-monkey-dinosaur"; // found in the req.params object
-// const hashedPassword = bcrypt.hashSync(password, 10);
+const password = "purple-monkey-dinosaur"; // found in the req.params object
+const hashedPassword = bcrypt.hashSync(password, 10);
 
-// const res = require("express/lib/response");
-// const morgan = require('morgan');
 const cookieSession = require("cookie-session");
 // const { cookie } = require("express/lib/response");
 
@@ -42,48 +42,12 @@ const {
   getUserByEmail,
   urlsForUser,
   generateRandomString,
-  passwordValidation,
-  authUser,
-  fetchAllUrls, 
-  fetchUserUrls
 } = require("./helpers");
 
 // variables
 
-const urlDatabase = {
-  b6UTxQ: {
-    longURL: "https://www.tsn.ca",
-    userID: "6e0abj"
-  },
-  i3BoGr: {
-    longURL: "https://www.google.ca",
-    userID: "6e0abj"
-  },
-  p3dnGr: {
-    longURL: "https://www.marvel.com/movies/eternals",
-    userID: "94ej19"
-  },
-  kofUHB: {
-    longURL: "https://www.marvel.com/movies/avengers-infinity-war",
-    userID: "94ej19"
-  },
-  MjnKhN: {
-    longURL: "https://www.imdb.com/title/tt6964844/",
-    userID: "94ej19"
-  }
-};
-const users = {
-  "6e0abj": {
-    id: "6e0abj",
-    email: "testone@gmail.com",
-    password: "$2a$10$rejKRGWIZdqnezjr5Xo4ZeAHKueb6Av85MUCz/25LFa//tRirPi.u",
-  },
-  "94ej19": {
-    id: "94ej19",
-    email: "gema@gmail.com",
-    password: "$2a$10$n0JFMZYbpt.SL9/ydbhLu.Jgb1dxog21H8Rd02jY7ZxtiUcR2n4O2",
-  },
-};
+const urlDatabase = {};
+const users = {};
 
 ///////////////////////////////////////////
 /*
@@ -91,7 +55,7 @@ ROUTING
 */
 
 // root - GET
-// Redirects to /urls if logged. ?????
+// Redirects to /urls if logged.
 
 app.get("/", (req, res) => {
   if (req.session.userID) {
@@ -106,44 +70,16 @@ app.get("/", (req, res) => {
 // must use urls for User function
 
 app.get("/urls", (req, res) => {
-  const userID = req.session["userID"];
-  // the if block of code is working as required ============================================================
-  if (userID == null) {
-    const user = users[`${userID}`];
-    const templateVars = {
-      user: user,
-    };
-    console.log('usre a probleme: ', userID);
-    return res.render("urls_index", templateVars);
-  }
-  let userUrls;
-  if (userID != null) {
-    userUrls = fetchUserUrls(urlDatabase, userID);
-  } else {
-    userUrls = fetchAllUrls();
-  }
-  const user = users[`${userID}`];
+  const userID = req.session.userID;
+  const userUrls = urlsForUser(userID, urlDatabase);
   const templateVars = {
-    user: user,
-    urls: userUrls
+    urls: userUrls,
+    user: users[userID],
   };
+  if (!userID) {
+    res.statusCode = 401;
+  }
   res.render("urls_index", templateVars);
-  // const userID = req.session.userID;
-  // if (!userID) {
-  //   res.statusCode = 401;
-  // }
-  // const userUrls = urlsForUser(userID, urlDatabase);
-  // if (userID && urlDatabase[userID].email !== undefined) {
-  //   // console.log(`longUrl: ${userID}, ${urlDatabase[userID].email}`);
-  //   const templateVars = {
-  //     urls: userUrls,
-  //     user: users[userID],
-  //     longURL: urlDatabase[userID].email,
-  //   };
-  //   res.render("urls_index", templateVars);
-  //   // console.log(`longUrl: ${userID}, ${urlDatabase[userID].longURL}`);
-  // }
-  // res.redirect("/urls/new");
 });
 
 // new url creation - POST
