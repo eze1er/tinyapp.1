@@ -137,7 +137,7 @@ app.get("/urls/:shortURL", (req, res) => {
 
 // url edit - POST
 // updates longURL if url belongs to user
-
+// bug fixed, the spelling of a variable : it was a miss spelling in line 148, it supposed to be updatedURL
 app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
 
@@ -145,7 +145,7 @@ app.post("/urls/:shortURL", (req, res) => {
     req.session.userID &&
     req.session.userID === urlDatabase[shortURL].userID
   ) {
-    urlDatabase[shortURL].longURL = req.body.updateURL;
+    urlDatabase[shortURL].longURL = req.body.updatedURL;
     res.redirect("/urls");
   } else {
     const errorMessage = "You are not authorized to do that.";
